@@ -7,7 +7,7 @@ const sectionArticlesEl = useTemplateRef<HTMLDivElement>('articles')
 const page = ref<number>(queryPage ? Number(queryPage) : 1)
 
 const { data, status, error } = await useFetch('/api/posts', {
-  query: { page: page, limit: 10 },
+  query: { page: page, limit: 8 },
 })
 
 const isLoaded = computed<boolean>(() => status.value === 'success')
@@ -67,7 +67,7 @@ const setPage = (_page: number) => {
 
   &__items {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     column-gap: 3.2rem;
     row-gap: 4rem;
     margin-bottom: 5rem;

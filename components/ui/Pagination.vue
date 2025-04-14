@@ -21,12 +21,14 @@ const addNumberBulletWhenMax = ref<number>(active > 5 ? active - visibleBy : 0)
 function handleBulletClick(bulletNumber: number) {
   const currentActive = bulletNumber + addNumberBulletWhenMax.value
 
-  if (active > visibleBy) {
-    const currentAdded = currentActive - visibleBy
-    addNumberBulletWhenMax.value = currentAdded < 0 ? 0 : currentAdded
-  }
+  if (active !== currentActive) {
+    if (active > visibleBy) {
+      const currentAdded = currentActive - visibleBy
+      addNumberBulletWhenMax.value = currentAdded < 0 ? 0 : currentAdded
+    }
 
-  emit('onSetActive', currentActive)
+    emit('onSetActive', currentActive)
+  }
 }
 
 function handleNavigationButtonPrevClick() {

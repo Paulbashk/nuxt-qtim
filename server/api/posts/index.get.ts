@@ -1,8 +1,17 @@
+import type { IPhoto } from '~/shared/types/IPhoto'
 import type { IPost } from '~/shared/types/IPost'
 
 interface IQueryPost {
   page?: number
   limit?: number
+}
+
+interface IResponsePhotos {
+  page: number
+  per_page: number
+  photos: IPhoto[]
+  total_results: number
+  next_page: string
 }
 
 export default defineCachedEventHandler(
@@ -26,13 +35,32 @@ export default defineCachedEventHandler(
 
     const pages = Math.ceil(counts / limit)
 
-    const postsWithNewServiceImage = posts.map((item) => ({
-      ...item,
-      image: `https://placebeard.it/1280x720?image=${item.id}`,
-    }))
+    const dataPhotos: IResponsePhotos = await $fetch(
+      `${config.apiUrlPixels}/curated`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: config.apiKeyPixels,
+        },
+        query: { per_page: counts },
+      }
+    )
+
+    const mappedPostsWithServiceImage = dataPhotos
+      ? posts.map((item, num) => {
+          const photo = dataPhotos.photos[num]
+
+          return {
+            ...item,
+            image: photo
+              ? photo.src.large2x
+              : `https://placebeard.it/1280x720?image=${item.id}`,
+          }
+        })
+      : posts
 
     if (page) {
-      const postsForPage = postsWithNewServiceImage.filter(
+      const postsForPage = mappedPostsWithServiceImage.filter(
         (_, num) => limit * page > num && num >= limit * (page - 1)
       )
 
@@ -46,7 +74,7 @@ export default defineCachedEventHandler(
       return { posts: postsForPage, pages, counts }
     }
 
-    return { posts: postsWithNewServiceImage, counts, pages }
+    return { posts: mappedPostsWithServiceImage, counts, pages }
   },
   {
     maxAge: 60 * 60,
